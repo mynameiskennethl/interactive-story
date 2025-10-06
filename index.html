@@ -1,0 +1,159 @@
+<header>
+    <link rel="stylesheet" href="index.css">
+</header>
+
+<body>
+    <div class="content">
+        <div class="container">
+            <div class="left" id="left-hover">
+                <div style="grid-area: image1;">
+                    <img id="friends" src="friends.png" style="width: 40%; height: inherit; margin: auto; filter:blur(20px);"></img>
+                </div>
+                <div style="grid-area: image2;">
+                    <img id="identity" src="identity.png" style="width: 40%; height: inherit; margin: auto; filter:blur(5px);"></img>
+                </div>
+            </div>
+            <div class="middle" style="text-align: center; margin-top: 10%;" id="middle-hover">
+                <img id="silhouette" src="silhouette.png" style="border: 1rem solid black; width: 65%; height: inherit; margin: auto;"></img>
+                
+            </div>
+            <div class="right" id="right-hover">
+                <div style="grid-area: image3; margin-top: 10%;">
+                    <img id="time" src="calendar.png" style="width: 40%; height: inherit; margin: auto; filter:blur(10px)"></img>
+                </div>
+                <div style="grid-area: image4; margin-top: 30%;">
+                    <img id="light" src="light.png" style="width: 40%; height: inherit; margin: auto; filter:blur(5px)"></img>
+                </div>
+            </div>
+            <div class="subtitle">
+                <p id="subtitle" class="subtitle-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('mousemove', function(e){
+            document.documentElement.style.setProperty('--pointerX', e.clientX + 'px');
+            document.documentElement.style.setProperty('--pointerY', e.clientY + 'px');
+        })
+
+        const scriptLines = {
+            1:{id:"silhouette", script:["It started with a message", "Before I knew it, everything revolved around this person", "I never noticed how narrow my vision was", "This was everything I saw", ""]},
+            2:{id:"friends",script:["She said they weren't good for me but she just didn't want me around anyone else", "They kept asking me to hamg out", "I missed days and nights I'll never get back", "I thought it was love", ""]},
+            3:{id:"identity",script:["There were fights, constant, and always draining", "Everything I did, was because of her, for her", "I shrank myself, gave up my voice to keep her close", "I stayed hoping things would change", ""]},
+            4:{id:"time",script:["Time slipped away", "Everything stayed the same, I was present but never really there", "I finally looked around", ""]},
+            5:{id:"light",script:["I chose myself for once", "It was hard, but things got easier over time", "I did hobbies I enjoyed again, rekindled connections I had lost, I remembered who I was", "But it took time", "A long, long time", ""]},
+            6:{id:"final",script:["Life is bigger than one person", "I used to think love meant giving everything", "But I've learned that losing yourself for someone else isn't loyalty", "Love doesn't restrict you from being you", "You're worth being seen, it's okay to choose yourself"]}
+        }
+
+        let currScript = null;
+        let lineIndex = 0;
+        let flashIndex = 1;
+        let itemIndex = 0;
+        let flashlightSize1 = 120;
+        let flashlightSize2 = 100;
+        let subtitleTimer = null;
+
+
+        function replaceText(nextLine){
+            subtitleLine = document.getElementById("subtitle");
+            subtitleLine.style.opacity = 0;
+            setTimeout(() => { subtitleLine.textContent = nextLine; subtitleLine.style.opacity = 1;}, 300);
+        }
+  
+        function playScript(nextScript){
+            clearTimeout(subtitleTimer);
+            lineIndex = 0; 
+            currScript = nextScript;
+            showNextLine();
+
+            const elements = scriptLines;
+            const currentId = document.getElementById(elements[itemIndex].id);
+            currentId.classList.remove("pulse");
+
+            if (elements[itemIndex].id === "light") {
+                itemIndex++;
+                growFlashlightGradually(500, 500);
+                document.getElementById("friends").classList.add("fade-out");
+                document.getElementById("identity").classList.add("fade-out");
+                document.getElementById("silhouette").classList.add("fade-out");
+                document.getElementById("time").classList.add("fade-out");
+                document.getElementById("light").classList.add("fade-out");
+                setTimeout(() => {
+                    const subtitleContainer = document.querySelector(".subtitle");
+                    subtitleContainer.classList.add("fullscreen-subtitle");
+                    playScript(scriptLines[6].script);
+                }, 30000);
+            }
+
+            setTimeout(addNextScipt, 30000);  
+        }
+
+        function showNextLine(){
+            if (lineIndex >= currScript.length){
+                return; 
+            }
+            replaceText(currScript[lineIndex]);
+            lineIndex++;
+            subtitleTimer = setTimeout(showNextLine, 8000);
+        }
+
+        function addNextScipt(){
+            const elements = scriptLines;
+            if (itemIndex < 6) {
+                itemIndex++;
+                flashlightSize1 = flashlightSize1 - 20;
+                flashlightSize2 = flashlightSize2 - 20;
+            }
+            
+            document.documentElement.style.setProperty("--flashLightSize1", flashlightSize1 + "%");
+            document.documentElement.style.setProperty("--flashLightSize2", flashlightSize2 + "%");
+            setTimeout(() => {
+                if(flashIndex < 6){
+                    flashIndex++;
+                }
+                    const nextId = elements[flashIndex].id;
+                    const nextElement = document.getElementById(nextId);
+                    nextElement.classList.add("pulse");
+                }
+            , 30000);
+            const currentId = document.getElementById(elements[itemIndex].id);
+            const handler = () => {
+                playScript(elements[itemIndex].script);
+                currentId.removeEventListener('mouseover', handler);
+            };
+            currentId.addEventListener('mouseover', handler);
+        }
+        
+
+        function growFlashlightGradually(targetSize1, targetSize2, duration = 5000) {
+            const steps = 50;
+            const intervalTime = duration / steps;
+            const sizeStep1 = (targetSize1 - flashlightSize1) / steps;
+            const sizeStep2 = (targetSize2 - flashlightSize2) / steps;
+
+            const interval = setInterval(() => {
+                flashlightSize1 += sizeStep1;
+                flashlightSize2 += sizeStep2;
+
+                document.documentElement.style.setProperty("--flashLightSize1", flashlightSize1 + "%");
+                document.documentElement.style.setProperty("--flashLightSize2", flashlightSize2 + "%");
+
+                if (Math.abs(flashlightSize1 - targetSize1) < 0.5 && Math.abs(flashlightSize2 - targetSize2) < 0.5) {
+                    clearInterval(interval);
+                }
+            }, intervalTime);
+        }
+
+        
+        
+
+        
+        
+        addNextScipt();
+        document.getElementById(scriptLines[1].id).classList.add("pulse");
+        
+    </script>
+
+</body>
+
